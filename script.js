@@ -520,13 +520,19 @@ function renderQuickLinks() {
       label.className = "quick-link-sr-only";
       label.textContent = saved.name;
       content.append(icon, label);
-      content.addEventListener("contextmenu", (event) => {
-        event.preventDefault();
-        if (!confirm(`Remove ${saved.name} from quick links?`)) return;
+      const remove = document.createElement("button");
+      remove.className = "quick-link-remove";
+      remove.type = "button";
+      remove.textContent = "×";
+      remove.title = `Remove ${saved.name}`;
+      remove.setAttribute("aria-label", `Remove ${saved.name} from quick links`);
+      remove.addEventListener("click", () => {
         quickLinks[index] = null;
         saveQuickLinks();
         renderQuickLinks();
       });
+      slot.replaceChildren(content, remove);
+      return;
     } else {
       content.type = "button";
       content.title = "Add a website";
