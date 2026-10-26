@@ -456,6 +456,73 @@ savedPageToggles.forEach((toggle) => toggle.addEventListener("click", () => {
 
 renderSavedPages();
 
+const customQuickLinkSlot = document.querySelector("#custom-quick-link-slot");
+const customQuickLinkKey = "toska-custom-quick-link";
+
+function readCustomQuickLink() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(customQuickLinkKey) || "null");
+    if (!saved || typeof saved.url !== "string") return null;
+    return { name: typeof saved.name === "string" ? saved.name : "", url: normalizeSavedPageUrl(saved.url) };
+  } catch { return null; }
+}
+
+function renderCustomQuickLink() {
+  const saved = readCustomQuickLink();
+  if (!saved) {
+    const addButton = document.createElement("button");
+    addButton.className = "quick-link quick-link-add";
+    addButton.type = "button";
+    addButton.setAttribute("aria-label", "Add a quick link");
+    addButton.title = "Add a quick link";
+    const plus = document.createElement("span");
+    plus.setAttribute("aria-hidden", "true");
+    plus.textContent = "+";
+    addButton.append(plus);
+    addButton.addEventListener("click", () => {
+      const enteredUrl = prompt("Website link");
+      if (!enteredUrl) return;
+      try {
+        const url = normalizeSavedPageUrl(enteredUrl);
+        const hostname = new URL(url).hostname.replace(/^www\./, "");
+        const enteredName = prompt("Shortcut name (optional)", hostname);
+        if (enteredName === null) return;
+        const custom = { name: enteredName.trim().slice(0, 60) || hostname, url };
+        try { localStorage.setItem(customQuickLinkKey, JSON.stringify(custom)); }
+        catch { /* Keep the shortcut available for this page session. */ }
+        renderCustomQuickLink();
+      } catch {
+        alert("Enter a valid website link.");
+      }
+    });
+    customQuickLinkSlot.replaceChildren(addButton);
+    return;
+  }
+
+  const link = document.createElement("a");
+  link.className = "quick-link quick-link-custom";
+  link.href = saved.url;
+  link.title = `${saved.name} · Right-click to remove`;
+  link.setAttribute("aria-label", saved.name);
+  const icon = document.createElement("span");
+  icon.className = "quick-link-icon";
+  icon.setAttribute("aria-hidden", "true");
+  const label = document.createElement("span");
+  label.className = "quick-link-sr-only";
+  label.textContent = saved.name;
+  link.append(icon, label);
+  link.addEventListener("contextmenu", (event) => {
+    event.preventDefault();
+    if (!confirm(`Remove ${saved.name} from quick links?`)) return;
+    try { localStorage.removeItem(customQuickLinkKey); }
+    catch { /* Re-render for this page session. */ }
+    renderCustomQuickLink();
+  });
+  customQuickLinkSlot.replaceChildren(link);
+}
+
+renderCustomQuickLink();
+
 themeCardSlot.addEventListener("dragenter", () => themeCardSlot.classList.add("is-drop-target"));
 themeCardSlot.addEventListener("dragover", (event) => event.preventDefault());
 themeCardSlot.addEventListener("dragleave", (event) => {
