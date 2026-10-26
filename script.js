@@ -458,6 +458,12 @@ renderSavedPages();
 
 const quickLinkSlots = [...document.querySelectorAll(".quick-link-slot")];
 const quickLinksKey = "toska-quick-links";
+const quickLinkDialog = document.querySelector("#quick-link-dialog");
+const quickLinkForm = document.querySelector("#quick-link-form");
+const quickLinkNameInput = document.querySelector("#quick-link-name");
+const quickLinkUrlInput = document.querySelector("#quick-link-url");
+const quickLinkError = document.querySelector("#quick-link-error");
+let editingQuickLinkSlot = null;
 
 function readQuickLinks() {
   try {
@@ -530,19 +536,34 @@ function renderQuickLinks() {
       plus.textContent = "+";
       content.append(plus);
       content.addEventListener("click", () => {
-        const enteredUrl = prompt("Website link");
-        if (!enteredUrl) return;
-        try {
-          const url = normalizeSavedPageUrl(enteredUrl);
-          quickLinks[index] = { name: new URL(url).hostname.replace(/^www\./, ""), url };
-          saveQuickLinks();
-          renderQuickLinks();
-        } catch { alert("Enter a valid website link."); }
+        editingQuickLinkSlot = index;
+        quickLinkForm.reset();
+        quickLinkError.textContent = "";
+        quickLinkDialog.showModal();
+        quickLinkUrlInput.focus();
       });
     }
     slot.replaceChildren(content);
   });
 }
+
+document.querySelector("#quick-link-cancel").addEventListener("click", () => quickLinkDialog.close());
+quickLinkDialog.addEventListener("close", () => { editingQuickLinkSlot = null; });
+quickLinkForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+  if (editingQuickLinkSlot === null) return;
+  try {
+    const url = normalizeSavedPageUrl(quickLinkUrlInput.value);
+    const hostname = new URL(url).hostname.replace(/^www\./, "");
+    quickLinks[editingQuickLinkSlot] = { name: quickLinkNameInput.value.trim().slice(0, 60) || hostname, url };
+    saveQuickLinks();
+    renderQuickLinks();
+    quickLinkDialog.close();
+  } catch {
+    quickLinkError.textContent = "Enter a valid website address, like example.com.";
+    quickLinkUrlInput.focus();
+  }
+});
 
 renderQuickLinks();
 
