@@ -477,6 +477,12 @@ try {
   storedTheme = localStorage.getItem("toska-page-theme") || "";
 } catch { /* Use the default card if storage is unavailable. */ }
 
+if (!storedTheme) {
+  storedTheme = `card:${cards[0][0]}`;
+  try { localStorage.setItem("toska-page-theme", storedTheme); }
+  catch { /* Keep the default card for this page session. */ }
+}
+
 if (storedTheme.startsWith("mode:") && ["light-preset", "dark-preset"].includes(storedTheme.slice(5))) {
   setPresetTheme(storedTheme.slice(5));
 } else {
@@ -488,6 +494,7 @@ if (storedTheme.startsWith("mode:") && ["light-preset", "dark-preset"].includes(
     document.body.dataset.tone = darkThemes.has(theme) ? "dark" : "light";
     selectedThemeCardFilename = filename;
     showThemeName(name);
+    showCardDetails(character, savedCardInfo[5]);
     cardButtons.get(filename)?.setAttribute("aria-pressed", "true");
     cardButtons.get(filename)?.remove();
     updateOrbitPositions();
