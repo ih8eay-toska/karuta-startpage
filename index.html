@@ -104,6 +104,20 @@
         </section>
       </div>
     </main>
+    <dialog class="quick-link-dialog" id="quick-link-dialog" aria-labelledby="quick-link-dialog-title">
+      <form id="quick-link-form">
+        <h2 id="quick-link-dialog-title">Add a quick link</h2>
+        <label for="quick-link-name">Site name <span>(optional)</span></label>
+        <input id="quick-link-name" name="name" type="text" maxlength="60" autocomplete="off" placeholder="Uses the website name by default" />
+        <label for="quick-link-url">Website address</label>
+        <input id="quick-link-url" name="url" type="text" inputmode="url" autocomplete="url" placeholder="example.com" aria-describedby="quick-link-error" />
+        <p class="quick-link-error" id="quick-link-error" aria-live="polite"></p>
+        <div class="quick-link-dialog-actions">
+          <button class="quick-link-cancel" id="quick-link-cancel" type="button">Cancel</button>
+          <button class="quick-link-save" type="submit">Save link</button>
+        </div>
+      </form>
+    </dialog>
     <script src="script.js"></script>
   </body>
 </html>
