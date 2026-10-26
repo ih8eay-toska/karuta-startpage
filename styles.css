@@ -116,6 +116,19 @@ body[data-tone="dark"] {
 .quick-link-add span { margin-top: -2px; }
 .quick-link-add:hover { color: var(--ink); }
 .quick-link-sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0, 0, 0, 0); white-space: nowrap; }
+.quick-link-dialog { width: min(400px, calc(100vw - 32px)); padding: 0; overflow: hidden; border: 1px solid color-mix(in srgb, var(--accent), transparent 58%); border-radius: 16px; background: var(--paper); color: var(--ink); box-shadow: 0 22px 70px rgba(20, 16, 14, .32); }
+.quick-link-dialog::backdrop { background: rgba(16, 13, 12, .62); backdrop-filter: blur(3px); }
+.quick-link-dialog form { display: grid; gap: 9px; padding: 22px; }
+.quick-link-dialog h2 { margin: 0 0 4px; color: var(--ink); font: 600 20px "Playfair Display", Georgia, serif; }
+.quick-link-dialog label { margin-top: 5px; color: var(--accent); font-size: 12px; font-weight: 700; }
+.quick-link-dialog label span { color: color-mix(in srgb, var(--ink), transparent 36%); font-weight: 400; }
+.quick-link-dialog input { width: 100%; min-width: 0; height: 42px; padding: 0 12px; border: 1px solid color-mix(in srgb, var(--accent), transparent 66%); border-radius: 9px; outline: 0; background: color-mix(in srgb, var(--paper), var(--ink) 5%); color: var(--ink); font: 500 14px "DM Sans", sans-serif; }
+.quick-link-dialog input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent), transparent 82%); }
+.quick-link-error { min-height: 16px; margin: -2px 0 0; color: #d94d56; font-size: 12px; }
+.quick-link-dialog-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.quick-link-dialog-actions button { min-height: 38px; padding: 0 14px; border: 1px solid color-mix(in srgb, var(--accent), transparent 58%); border-radius: 9px; background: transparent; color: var(--ink); font: 600 13px "DM Sans", sans-serif; cursor: pointer; }
+.quick-link-dialog-actions .quick-link-save { border-color: var(--accent); background: var(--accent); color: var(--paper); }
+.quick-link-dialog-actions button:hover { filter: brightness(1.08); }
 .saved-divider-content { display: grid; grid-template-rows: 0fr; width: 100%; opacity: 0; transition: grid-template-rows .46s cubic-bezier(.2,.75,.25,1), opacity .46s ease; }
 .saved-divider[data-open="true"] .saved-divider-content { grid-template-rows: 1fr; opacity: 1; }
 .saved-divider-inner { min-height: 0; overflow: hidden; padding: 0 16px; text-align: left; transition: padding .46s cubic-bezier(.2,.75,.25,1); }
