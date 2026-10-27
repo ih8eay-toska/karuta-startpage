@@ -849,15 +849,4 @@ musicVolume.addEventListener("input", updateMusicVolume);
 updateMusicVolume();
 updateMusicPosition();
 
-const entryScreen = document.querySelector("#entry-screen");
-document.querySelector("#enter-site").addEventListener("click", () => {
-  if (entryScreen.inert) return;
-  startMusic();
-  entryScreen.inert = true;
-  entryScreen.classList.add("is-dismissed");
-  document.querySelector("main.home").inert = false;
-  document.body.classList.remove("is-entering");
-  queryInput.focus({ preventScroll: true });
-  setTimeout(() => entryScreen.remove(), 200);
-});
 
