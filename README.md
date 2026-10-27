@@ -6,7 +6,7 @@
 
 - **Card themes:** dark and light collections, with each card setting its own colors and accent glow. The selected theme is remembered between visits.
 - **Search:** search Google or YouTube with the engine picker, or use `g` and `yt` prefixes in the search field.
-- **Quick links:** three theme-colored slots attach to the right side of the search panel. Add a site through the in-page dialog; its favicon is fetched automatically, and you can remove it with the small × control. Links are stored in this browser.
+- **Quick links:** six theme-colored slots attach to the search panel, three on each side. Add a site through the in-page dialog; its favicon is fetched automatically, and you can remove it with the small × control. Links are stored in this browser.
 - **Saved pages:** four language tabs—Saved, Enregistré, 已保存, and 保存済み—each with three editable website slots. Entries are stored in this browser.
 - **Persistent wheels:** wheel positions are remembered between visits.
 

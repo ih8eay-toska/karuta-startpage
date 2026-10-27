@@ -479,7 +479,7 @@ function readQuickLinks() {
     const legacy = JSON.parse(localStorage.getItem("toska-custom-quick-link") || "null");
     if (legacy && typeof legacy.url === "string") {
       const url = normalizeSavedPageUrl(legacy.url);
-      return [{ name: legacy.name || new URL(url).hostname.replace(/^www\./, ""), url }, null, null];
+      return Array.from({ length: quickLinkSlots.length }, (_, index) => index === 0 ? { name: legacy.name || new URL(url).hostname.replace(/^www\./, ""), url } : null);
     }
   } catch { /* Start with empty slots if storage is unavailable or invalid. */ }
   return Array(quickLinkSlots.length).fill(null);
