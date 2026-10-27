@@ -10,7 +10,7 @@
 - **Saved pages:** four language tabs—Saved, Enregistré, 已保存, and 保存済み—each with three editable website slots. Entries are stored in this browser.
 - **Persistent wheels:** wheel positions are remembered between visits.
 - **Music:** play Lengya using theme-colored playback, seek, and volume controls beneath the search bar.
-- **Clock:** a live clock defaults to GMT+7 (Vietnam). Pick from ten common timezones; the selection is remembered and follows that timezone’s daylight saving rules. Previously saved timezones remain available.
+- **Clock:** a live clock defaults to GMT+7. Choose a fixed GMT offset from GMT-12 to GMT+14; the choice is remembered without seasonal clock changes. Previously saved timezones are converted to their current GMT offset.
 
 ## Run locally
 

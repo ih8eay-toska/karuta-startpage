@@ -675,43 +675,43 @@ syncEngineMark();
 
 const clockTime = document.querySelector("#clock-time");
 const clockTimezone = document.querySelector("#clock-timezone");
-const defaultClockZone = "Asia/Ho_Chi_Minh";
-const clockZoneChoices = [
-  [defaultClockZone, "GMT+7 · Vietnam"], ["Asia/Shanghai", "China"], ["Asia/Tokyo", "Japan"],
-  ["Asia/Kolkata", "India"], ["UTC", "GMT · UTC"], ["Europe/London", "London"],
-  ["Europe/Paris", "Paris"], ["America/New_York", "New York"],
-  ["America/Los_Angeles", "Los Angeles"], ["Australia/Sydney", "Sydney"],
-];
+let clockOffset = 7 * 60;
 try {
-  const savedZone = localStorage.getItem("toska-clock-timezone");
-  if (savedZone && !clockZoneChoices.some(([zone]) => zone === savedZone)) {
-    new Intl.DateTimeFormat("en-GB", { timeZone: savedZone });
-    clockZoneChoices.push([savedZone, savedZone.replaceAll("_", " ")]);
+  const savedOffset = localStorage.getItem("toska-clock-gmt-offset");
+  if (savedOffset !== null) {
+    const minutes = Number(savedOffset);
+    if (Number.isInteger(minutes) && minutes >= -720 && minutes <= 840) clockOffset = minutes;
+  } else {
+    const savedZone = localStorage.getItem("toska-clock-timezone");
+    if (savedZone) {
+      const offsetName = new Intl.DateTimeFormat("en", { timeZone: savedZone, timeZoneName: "longOffset" }).formatToParts().find(part => part.type === "timeZoneName").value;
+      const offset = offsetName.match(/^GMT([+-])(\d{2}):(\d{2})$/);
+      if (offsetName === "GMT") clockOffset = 0;
+      else if (offset) clockOffset = (offset[1] === "+" ? 1 : -1) * (Number(offset[2]) * 60 + Number(offset[3]));
+    }
   }
-} catch { /* Ignore invalid previous choices. */ }
-const clockZones = clockZoneChoices.map(([zone]) => zone);
-for (const [zone, label] of clockZoneChoices) {
+} catch { /* Use GMT+7 when storage or a previous timezone is unavailable. */ }
+const clockOffsets = Array.from({ length: 27 }, (_, index) => (index - 12) * 60);
+if (!clockOffsets.includes(clockOffset)) clockOffsets.push(clockOffset);
+clockOffsets.sort((a, b) => a - b);
+for (const minutes of clockOffsets) {
   const option = document.createElement("option");
-  option.value = zone;
-  option.textContent = label;
+  option.value = String(minutes);
+  const hours = Math.floor(Math.abs(minutes) / 60);
+  const remainder = Math.abs(minutes) % 60;
+  option.textContent = `GMT${minutes < 0 ? "-" : "+"}${hours}${remainder ? `:${String(remainder).padStart(2, "0")}` : ""}`;
   clockTimezone.append(option);
 }
-let clockZone = defaultClockZone;
-try {
-  const savedZone = localStorage.getItem("toska-clock-timezone");
-  if (clockZones.includes(savedZone)) clockZone = savedZone;
-} catch { /* Use GMT+7 when storage is unavailable. */ }
-clockTimezone.value = clockZone;
-let clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: clockZone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+clockTimezone.value = String(clockOffset);
+const clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
 function updateClock() {
   const now = new Date();
-  clockTime.textContent = clockFormatter.format(now);
+  clockTime.textContent = clockFormatter.format(new Date(now.getTime() + clockOffset * 60000));
   clockTime.dateTime = now.toISOString();
 }
 clockTimezone.addEventListener("change", () => {
-  clockZone = clockTimezone.value;
-  clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: clockZone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
-  try { localStorage.setItem("toska-clock-timezone", clockZone); } catch { /* Keep the choice for this visit. */ }
+  clockOffset = Number(clockTimezone.value);
+  try { localStorage.setItem("toska-clock-gmt-offset", String(clockOffset)); } catch { /* Keep the choice for this visit. */ }
   updateClock();
 });
 updateClock();
