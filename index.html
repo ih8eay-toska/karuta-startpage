@@ -65,8 +65,13 @@
                     <select id="clock-timezone" aria-label="Clock timezone"></select>
                   </div>
                   <div class="home-music">
-                    <span>Lengya</span>
-                    <audio controls preload="none" src="assets/music/lengya.mp3" aria-label="Play Lengya">Your browser does not support audio playback.</audio>
+                    <audio id="music-audio" preload="metadata" src="assets/music/lengya.mp3" hidden></audio>
+                    <button class="music-play" id="music-play" type="button" aria-label="Play Lengya" aria-pressed="false"><span aria-hidden="true">▶</span></button>
+                    <div class="music-track"><span class="music-title">Lengya</span><span class="music-position" id="music-position">0:00 / 0:00</span></div>
+                    <label class="quick-link-sr-only" for="music-seek">Track position</label>
+                    <input class="music-slider music-seek" id="music-seek" type="range" min="0" max="1000" value="0" disabled />
+                    <div class="music-volume"><span aria-hidden="true">♪</span><label class="quick-link-sr-only" for="music-volume">Volume</label><input class="music-slider" id="music-volume" type="range" min="0" max="100" value="70" /></div>
+                    <p class="music-status" id="music-status" role="status" hidden></p>
                   </div>
                 </div>
                 <nav class="quick-links" aria-label="Right quick links">

@@ -676,11 +676,24 @@ syncEngineMark();
 const clockTime = document.querySelector("#clock-time");
 const clockTimezone = document.querySelector("#clock-timezone");
 const defaultClockZone = "Asia/Ho_Chi_Minh";
-const clockZones = [...new Set([defaultClockZone, "UTC", ...(Intl.supportedValuesOf ? Intl.supportedValuesOf("timeZone") : ["America/New_York", "Europe/Paris", "Asia/Tokyo", "Australia/Sydney"])])];
-for (const zone of clockZones) {
+const clockZoneChoices = [
+  [defaultClockZone, "GMT+7 · Vietnam"], ["Asia/Shanghai", "China"], ["Asia/Tokyo", "Japan"],
+  ["Asia/Kolkata", "India"], ["UTC", "GMT · UTC"], ["Europe/London", "London"],
+  ["Europe/Paris", "Paris"], ["America/New_York", "New York"],
+  ["America/Los_Angeles", "Los Angeles"], ["Australia/Sydney", "Sydney"],
+];
+try {
+  const savedZone = localStorage.getItem("toska-clock-timezone");
+  if (savedZone && !clockZoneChoices.some(([zone]) => zone === savedZone)) {
+    new Intl.DateTimeFormat("en-GB", { timeZone: savedZone });
+    clockZoneChoices.push([savedZone, savedZone.replaceAll("_", " ")]);
+  }
+} catch { /* Ignore invalid previous choices. */ }
+const clockZones = clockZoneChoices.map(([zone]) => zone);
+for (const [zone, label] of clockZoneChoices) {
   const option = document.createElement("option");
   option.value = zone;
-  option.textContent = zone === defaultClockZone ? "GMT+7 · Vietnam" : zone.replaceAll("_", " ");
+  option.textContent = label;
   clockTimezone.append(option);
 }
 let clockZone = defaultClockZone;
@@ -704,4 +717,58 @@ clockTimezone.addEventListener("change", () => {
 updateClock();
 setInterval(() => { if (!document.hidden) updateClock(); }, 1000);
 document.addEventListener("visibilitychange", () => { if (!document.hidden) updateClock(); });
+
+const musicAudio = document.querySelector("#music-audio");
+const musicPlay = document.querySelector("#music-play");
+const musicSeek = document.querySelector("#music-seek");
+const musicVolume = document.querySelector("#music-volume");
+const musicPosition = document.querySelector("#music-position");
+const musicStatus = document.querySelector("#music-status");
+function formatMusicTime(seconds) {
+  const value = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
+  return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, "0")}`;
+}
+function updateMusicPosition() {
+  const duration = musicAudio.duration;
+  musicSeek.disabled = !Number.isFinite(duration) || duration <= 0;
+  const fraction = musicSeek.disabled ? 0 : musicAudio.currentTime / duration;
+  musicSeek.value = String(Math.round(fraction * 1000));
+  musicSeek.style.setProperty("--progress", `${fraction * 100}%`);
+  musicPosition.textContent = `${formatMusicTime(musicAudio.currentTime)} / ${formatMusicTime(duration)}`;
+  musicSeek.setAttribute("aria-valuetext", `${formatMusicTime(musicAudio.currentTime)} of ${formatMusicTime(duration)}`);
+}
+function updateMusicPlay() {
+  const playing = !musicAudio.paused && !musicAudio.ended;
+  musicPlay.firstElementChild.textContent = playing ? "Ⅱ" : "▶";
+  musicPlay.setAttribute("aria-label", playing ? "Pause Lengya" : "Play Lengya");
+  musicPlay.setAttribute("aria-pressed", String(playing));
+}
+musicPlay.addEventListener("click", async () => {
+  if (!musicAudio.paused) { musicAudio.pause(); return; }
+  musicStatus.hidden = true;
+  try { await musicAudio.play(); }
+  catch {
+    musicStatus.textContent = "Unable to play Lengya. Please try again.";
+    musicStatus.hidden = false;
+  }
+});
+for (const event of ["play", "pause", "ended"]) musicAudio.addEventListener(event, updateMusicPlay);
+for (const event of ["loadedmetadata", "durationchange", "timeupdate", "emptied"]) musicAudio.addEventListener(event, updateMusicPosition);
+musicAudio.addEventListener("error", () => {
+  musicStatus.textContent = "The music file could not be loaded.";
+  musicStatus.hidden = false;
+  updateMusicPlay();
+});
+musicSeek.addEventListener("input", () => {
+  if (Number.isFinite(musicAudio.duration)) musicAudio.currentTime = Number(musicSeek.value) / 1000 * musicAudio.duration;
+  updateMusicPosition();
+});
+function updateMusicVolume() {
+  musicAudio.volume = Number(musicVolume.value) / 100;
+  musicVolume.style.setProperty("--progress", `${musicVolume.value}%`);
+  musicVolume.setAttribute("aria-valuetext", `${musicVolume.value}%`);
+}
+musicVolume.addEventListener("input", updateMusicVolume);
+updateMusicVolume();
+updateMusicPosition();
 
