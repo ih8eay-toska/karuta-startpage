@@ -12,8 +12,15 @@
     <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="styles.css" />
   </head>
-  <body>
-    <main class="home">
+  <body class="is-entering">
+    <div class="entry-screen" id="entry-screen" role="dialog" aria-modal="true" aria-label="Enter 桃花">
+      <button class="entry-button" id="enter-site" type="button" autofocus aria-label="Enter 桃花 and play 冷夜">
+        <span class="entry-brand" lang="zh">桃花</span>
+        <span class="entry-prompt">Press to enter</span>
+        <span class="entry-track" lang="zh">♪ 冷夜</span>
+      </button>
+    </div>
+    <main class="home" inert>
       <div class="home-layout">
         <section class="orbit-side dark-side" aria-label="Dark card themes">
           <div class="orbit" id="dark-orbit">
@@ -64,9 +71,9 @@
                     <button id="clock-timezone" type="button" aria-haspopup="dialog" aria-controls="timezone-dialog" aria-label="Change clock GMT offset">GMT+7 <span aria-hidden="true">⌄</span></button>
                   </div>
                   <div class="home-music">
-                    <audio id="music-audio" preload="metadata" src="assets/music/lengya.mp3" hidden></audio>
-                    <button class="music-play" id="music-play" type="button" aria-label="Play Lengya" aria-pressed="false"><span aria-hidden="true">▶</span></button>
-                    <div class="music-track"><span class="music-title">Lengya</span><span class="music-position" id="music-position">0:00 / 0:00</span></div>
+                    <audio id="music-audio" preload="metadata" src="assets/music/冷夜.mp3" hidden></audio>
+                    <button class="music-play" id="music-play" type="button" aria-label="Play 冷夜" aria-pressed="false"><span aria-hidden="true">▶</span></button>
+                    <div class="music-track"><span class="music-title" lang="zh">冷夜</span><span class="music-position" id="music-position">0:00 / 0:00</span></div>
                     <label class="quick-link-sr-only" for="music-seek">Track position</label>
                     <input class="music-slider music-seek" id="music-seek" type="range" min="0" max="1000" value="0" disabled />
                     <div class="music-volume"><span aria-hidden="true">♪</span><label class="quick-link-sr-only" for="music-volume">Volume</label><input class="music-slider" id="music-volume" type="range" min="0" max="100" value="70" /></div>

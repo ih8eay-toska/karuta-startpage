@@ -814,17 +814,20 @@ function updateMusicPosition() {
 function updateMusicPlay() {
   const playing = !musicAudio.paused && !musicAudio.ended;
   musicPlay.firstElementChild.textContent = playing ? "Ⅱ" : "▶";
-  musicPlay.setAttribute("aria-label", playing ? "Pause Lengya" : "Play Lengya");
+  musicPlay.setAttribute("aria-label", playing ? "Pause 冷夜" : "Play 冷夜");
   musicPlay.setAttribute("aria-pressed", String(playing));
 }
-musicPlay.addEventListener("click", async () => {
-  if (!musicAudio.paused) { musicAudio.pause(); return; }
+async function startMusic() {
   musicStatus.hidden = true;
   try { await musicAudio.play(); }
   catch {
-    musicStatus.textContent = "Unable to play Lengya. Please try again.";
+    musicStatus.textContent = "Unable to play 冷夜. Please try again.";
     musicStatus.hidden = false;
   }
+}
+musicPlay.addEventListener("click", () => {
+  if (!musicAudio.paused) musicAudio.pause();
+  else startMusic();
 });
 for (const event of ["play", "pause", "ended"]) musicAudio.addEventListener(event, updateMusicPlay);
 for (const event of ["loadedmetadata", "durationchange", "timeupdate", "emptied"]) musicAudio.addEventListener(event, updateMusicPosition);
@@ -845,4 +848,16 @@ function updateMusicVolume() {
 musicVolume.addEventListener("input", updateMusicVolume);
 updateMusicVolume();
 updateMusicPosition();
+
+const entryScreen = document.querySelector("#entry-screen");
+document.querySelector("#enter-site").addEventListener("click", () => {
+  if (entryScreen.inert) return;
+  startMusic();
+  entryScreen.inert = true;
+  entryScreen.classList.add("is-dismissed");
+  document.querySelector("main.home").inert = false;
+  document.body.classList.remove("is-entering");
+  queryInput.focus({ preventScroll: true });
+  setTimeout(() => entryScreen.remove(), 200);
+});
 
