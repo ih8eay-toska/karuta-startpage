@@ -9,6 +9,8 @@
 - **Quick links:** six theme-colored slots attach to the search panel, three on each side. Add a site through the in-page dialog; its favicon is fetched automatically, and you can remove it with the small × control. Links are stored in this browser.
 - **Saved pages:** four language tabs—Saved, Enregistré, 已保存, and 保存済み—each with three editable website slots. Entries are stored in this browser.
 - **Persistent wheels:** wheel positions are remembered between visits.
+- **Music:** play Lengya with playback, seek, and volume controls beneath the search bar.
+- **Clock:** a live clock defaults to GMT+7 (Vietnam). Choose another timezone; the selection is remembered and follows that timezone’s daylight saving rules.
 
 ## Run locally
 

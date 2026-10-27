@@ -673,3 +673,35 @@ form.addEventListener("submit", (event) => {
 
 syncEngineMark();
 
+const clockTime = document.querySelector("#clock-time");
+const clockTimezone = document.querySelector("#clock-timezone");
+const defaultClockZone = "Asia/Ho_Chi_Minh";
+const clockZones = [...new Set([defaultClockZone, "UTC", ...(Intl.supportedValuesOf ? Intl.supportedValuesOf("timeZone") : ["America/New_York", "Europe/Paris", "Asia/Tokyo", "Australia/Sydney"])])];
+for (const zone of clockZones) {
+  const option = document.createElement("option");
+  option.value = zone;
+  option.textContent = zone === defaultClockZone ? "GMT+7 · Vietnam" : zone.replaceAll("_", " ");
+  clockTimezone.append(option);
+}
+let clockZone = defaultClockZone;
+try {
+  const savedZone = localStorage.getItem("toska-clock-timezone");
+  if (clockZones.includes(savedZone)) clockZone = savedZone;
+} catch { /* Use GMT+7 when storage is unavailable. */ }
+clockTimezone.value = clockZone;
+let clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: clockZone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+function updateClock() {
+  const now = new Date();
+  clockTime.textContent = clockFormatter.format(now);
+  clockTime.dateTime = now.toISOString();
+}
+clockTimezone.addEventListener("change", () => {
+  clockZone = clockTimezone.value;
+  clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: clockZone, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
+  try { localStorage.setItem("toska-clock-timezone", clockZone); } catch { /* Keep the choice for this visit. */ }
+  updateClock();
+});
+updateClock();
+setInterval(() => { if (!document.hidden) updateClock(); }, 1000);
+document.addEventListener("visibilitychange", () => { if (!document.hidden) updateClock(); });
+

@@ -58,6 +58,17 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
                 </button>
                 </form>
+                <div class="home-utilities">
+                  <div class="home-clock">
+                    <time id="clock-time" aria-label="Current time">--:--:--</time>
+                    <label class="quick-link-sr-only" for="clock-timezone">Clock timezone</label>
+                    <select id="clock-timezone" aria-label="Clock timezone"></select>
+                  </div>
+                  <div class="home-music">
+                    <span>Lengya</span>
+                    <audio controls preload="none" src="assets/music/lengya.mp3" aria-label="Play Lengya">Your browser does not support audio playback.</audio>
+                  </div>
+                </div>
                 <nav class="quick-links" aria-label="Right quick links">
                   <div class="quick-link-slot" data-slot="0">
                     <button class="quick-link quick-link-add" type="button" aria-label="Add a quick link" title="Add a quick link">
