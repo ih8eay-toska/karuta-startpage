@@ -713,12 +713,14 @@ function setupOffsetWheel(element, choices, value, onChange) {
     const option = document.createElement("div");
     option.id = `${element.id}-${index}`;
     option.setAttribute("role", "option");
+    option.setAttribute("aria-selected", "false");
     option.textContent = choice.label;
     return option;
   });
   element.replaceChildren(...options);
   function syncSelection(index) {
-    options.forEach((option, i) => option.setAttribute("aria-selected", String(i === index)));
+    options[selected].setAttribute("aria-selected", "false");
+    options[index].setAttribute("aria-selected", "true");
     element.setAttribute("aria-activedescendant", options[index].id);
   }
   syncSelection(selected);
@@ -726,13 +728,19 @@ function setupOffsetWheel(element, choices, value, onChange) {
   element.onscroll = () => {
     const index = Math.max(0, Math.min(choices.length - 1, Math.round(element.scrollTop / 44)));
     if (selected === index) return;
-    selected = index;
     syncSelection(index);
+    selected = index;
     onChange(choices[index].value);
   };
   function scrollToIndex(index) {
-    element.scrollTo({ top: index * 44, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+    element.scrollTop = Math.max(0, Math.min(choices.length - 1, index)) * 44;
+    element.onscroll();
   }
+  element.onwheel = event => {
+    if (!event.deltaY || event.deltaMode === 0) return;
+    event.preventDefault();
+    scrollToIndex(selected + Math.sign(event.deltaY));
+  };
   element.onclick = event => {
     const index = options.indexOf(event.target.closest('[role="option"]'));
     if (index >= 0) scrollToIndex(index);

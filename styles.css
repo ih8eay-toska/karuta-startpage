@@ -158,11 +158,13 @@ body[data-tone="dark"] .home-utilities { color-scheme: dark; }
 .quick-link-dialog-actions .quick-link-save { border-color: var(--accent); background: var(--accent); color: var(--paper); }
 .quick-link-dialog-actions button:hover { filter: brightness(1.08); }
 .timezone-dialog { width: min(300px, calc(100vw - 32px)); }
+.timezone-dialog::backdrop { backdrop-filter: none; }
 .timezone-wheels { display: grid; grid-template-columns: 1fr 1.5fr; gap: 16px; margin: 14px 0; }
 .timezone-wheel-label { display: block; margin-bottom: 8px; color: var(--accent); text-align: center; font-size: 12px; }
 .timezone-wheel-frame { position: relative; }
 .timezone-wheel-frame::before { content: ""; position: absolute; top: 44px; right: 0; left: 0; height: 44px; border: 1px solid color-mix(in srgb, var(--accent), transparent 70%); border-radius: 9px; background: color-mix(in srgb, var(--accent), transparent 92%); pointer-events: none; }
-.timezone-wheel { height: 132px; padding-block: 44px; overflow-y: auto; overscroll-behavior: contain; scroll-snap-type: y mandatory; scrollbar-width: none; touch-action: pan-y; mask-image: linear-gradient(transparent, black 32%, black 68%, transparent); }
+.timezone-wheel-frame::after { content: ""; position: absolute; inset: 0; background: linear-gradient(var(--paper), transparent 32%, transparent 68%, var(--paper)); pointer-events: none; }
+.timezone-wheel { height: 132px; padding-block: 44px; overflow-y: auto; overscroll-behavior: contain; scroll-snap-type: y mandatory; scrollbar-width: none; touch-action: pan-y; }
 .timezone-wheel::-webkit-scrollbar { display: none; }
 .timezone-wheel:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; border-radius: 9px; }
 .timezone-wheel [role="option"] { height: 44px; display: flex; align-items: center; justify-content: center; scroll-snap-align: center; color: var(--ink); opacity: .45; font-size: 27px; font-variant-numeric: tabular-nums; cursor: pointer; user-select: none; }
