@@ -691,28 +691,94 @@ try {
     }
   }
 } catch { /* Use GMT+7 when storage or a previous timezone is unavailable. */ }
-const clockOffsets = Array.from({ length: 27 }, (_, index) => (index - 12) * 60);
-if (!clockOffsets.includes(clockOffset)) clockOffsets.push(clockOffset);
-clockOffsets.sort((a, b) => a - b);
-for (const minutes of clockOffsets) {
-  const option = document.createElement("option");
-  option.value = String(minutes);
+function formatOffsetHours(minutes) {
   const hours = Math.floor(Math.abs(minutes) / 60);
   const remainder = Math.abs(minutes) % 60;
-  option.textContent = `GMT${minutes < 0 ? "-" : "+"}${hours}${remainder ? `:${String(remainder).padStart(2, "0")}` : ""}`;
-  clockTimezone.append(option);
+  return `${hours}${remainder ? `:${String(remainder).padStart(2, "0")}` : ""}`;
 }
-clockTimezone.value = String(clockOffset);
+function updateClockOffsetLabel() {
+  const label = `GMT${clockOffset < 0 ? "−" : "+"}${formatOffsetHours(clockOffset)}`;
+  clockTimezone.textContent = `${label} ⌄`;
+  clockTimezone.setAttribute("aria-label", `Change clock GMT offset, currently ${label}`);
+}
+updateClockOffsetLabel();
+const timezoneDialog = document.querySelector("#timezone-dialog");
+const timezoneSignWheel = document.querySelector("#timezone-sign");
+const timezoneHoursWheel = document.querySelector("#timezone-hours");
+let pickerOffsetSign = 1;
+let pickerOffsetMinutes = 420;
+function setupOffsetWheel(element, choices, value, onChange) {
+  let selected = Math.max(0, choices.findIndex(choice => choice.value === value));
+  const options = choices.map((choice, index) => {
+    const option = document.createElement("div");
+    option.id = `${element.id}-${index}`;
+    option.setAttribute("role", "option");
+    option.textContent = choice.label;
+    return option;
+  });
+  element.replaceChildren(...options);
+  function syncSelection(index) {
+    options.forEach((option, i) => option.setAttribute("aria-selected", String(i === index)));
+    element.setAttribute("aria-activedescendant", options[index].id);
+  }
+  syncSelection(selected);
+  element.scrollTop = selected * 44;
+  element.onscroll = () => {
+    const index = Math.max(0, Math.min(choices.length - 1, Math.round(element.scrollTop / 44)));
+    if (selected === index) return;
+    selected = index;
+    syncSelection(index);
+    onChange(choices[index].value);
+  };
+  function scrollToIndex(index) {
+    element.scrollTo({ top: index * 44, behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+  }
+  element.onclick = event => {
+    const index = options.indexOf(event.target.closest('[role="option"]'));
+    if (index >= 0) scrollToIndex(index);
+  };
+  element.onkeydown = event => {
+    const index = { ArrowUp: selected - 1, ArrowDown: selected + 1, Home: 0, End: choices.length - 1 }[event.key];
+    if (index === undefined) return;
+    event.preventDefault();
+    scrollToIndex(Math.max(0, Math.min(choices.length - 1, index)));
+  };
+}
+function setupHoursWheel() {
+  const limit = pickerOffsetSign < 0 ? 12 : 14;
+  pickerOffsetMinutes = Math.min(pickerOffsetMinutes, limit * 60);
+  const values = Array.from({ length: limit + 1 }, (_, hour) => hour * 60);
+  if (!values.includes(pickerOffsetMinutes)) values.push(pickerOffsetMinutes);
+  values.sort((a, b) => a - b);
+  setupOffsetWheel(timezoneHoursWheel, values.map(value => ({ value, label: formatOffsetHours(value) })), pickerOffsetMinutes, value => { pickerOffsetMinutes = value; });
+}
+clockTimezone.addEventListener("click", () => {
+  pickerOffsetSign = clockOffset < 0 ? -1 : 1;
+  pickerOffsetMinutes = Math.abs(clockOffset);
+  timezoneDialog.showModal();
+  setupOffsetWheel(timezoneSignWheel, [{ value: 1, label: "+" }, { value: -1, label: "−" }], pickerOffsetSign, value => {
+    pickerOffsetSign = value;
+    setupHoursWheel();
+  });
+  setupHoursWheel();
+  timezoneSignWheel.focus();
+});
+document.querySelector("#timezone-cancel").addEventListener("click", () => timezoneDialog.close());
 const clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
 function updateClock() {
   const now = new Date();
   clockTime.textContent = clockFormatter.format(new Date(now.getTime() + clockOffset * 60000));
   clockTime.dateTime = now.toISOString();
 }
-clockTimezone.addEventListener("change", () => {
-  clockOffset = Number(clockTimezone.value);
+document.querySelector("#timezone-form").addEventListener("submit", event => {
+  event.preventDefault();
+  timezoneSignWheel.onscroll();
+  timezoneHoursWheel.onscroll();
+  clockOffset = pickerOffsetSign * pickerOffsetMinutes;
   try { localStorage.setItem("toska-clock-gmt-offset", String(clockOffset)); } catch { /* Keep the choice for this visit. */ }
+  updateClockOffsetLabel();
   updateClock();
+  timezoneDialog.close();
 });
 updateClock();
 setInterval(() => { if (!document.hidden) updateClock(); }, 1000);

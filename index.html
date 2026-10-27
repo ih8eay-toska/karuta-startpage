@@ -61,8 +61,7 @@
                 <div class="home-utilities">
                   <div class="home-clock">
                     <time id="clock-time" aria-label="Current time">--:--:--</time>
-                    <label class="quick-link-sr-only" for="clock-timezone">Clock timezone</label>
-                    <select id="clock-timezone" aria-label="Clock timezone"></select>
+                    <button id="clock-timezone" type="button" aria-haspopup="dialog" aria-controls="timezone-dialog" aria-label="Change clock GMT offset">GMT+7 <span aria-hidden="true">⌄</span></button>
                   </div>
                   <div class="home-music">
                     <audio id="music-audio" preload="metadata" src="assets/music/lengya.mp3" hidden></audio>
@@ -144,6 +143,16 @@
           <button class="quick-link-cancel" id="quick-link-cancel" type="button">Cancel</button>
           <button class="quick-link-save" type="submit">Save link</button>
         </div>
+      </form>
+    </dialog>
+    <dialog class="quick-link-dialog timezone-dialog" id="timezone-dialog" aria-labelledby="timezone-title">
+      <form id="timezone-form">
+        <h2 id="timezone-title">Set GMT offset</h2>
+        <div class="timezone-wheels">
+          <div><span class="timezone-wheel-label" id="timezone-sign-label">Sign</span><div class="timezone-wheel-frame"><div class="timezone-wheel" id="timezone-sign" role="listbox" tabindex="0" aria-labelledby="timezone-sign-label"></div></div></div>
+          <div><span class="timezone-wheel-label" id="timezone-hours-label">Hours</span><div class="timezone-wheel-frame"><div class="timezone-wheel" id="timezone-hours" role="listbox" tabindex="0" aria-labelledby="timezone-hours-label"></div></div></div>
+        </div>
+        <div class="quick-link-dialog-actions"><button id="timezone-cancel" type="button">Cancel</button><button class="quick-link-save" type="submit">Done</button></div>
       </form>
     </dialog>
     <script src="script.js"></script>
