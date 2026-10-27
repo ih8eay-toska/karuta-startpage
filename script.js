@@ -849,4 +849,27 @@ musicVolume.addEventListener("input", updateMusicVolume);
 updateMusicVolume();
 updateMusicPosition();
 
+const musicVolumeControl = document.querySelector("#music-volume-control");
+const musicVolumeToggle = document.querySelector("#music-volume-toggle");
+const musicVolumePanel = document.querySelector("#music-volume-panel");
+function setMusicVolumeOpen(open, restoreFocus = false) {
+  musicVolumePanel.hidden = !open;
+  musicVolumeToggle.setAttribute("aria-expanded", String(open));
+  if (open) musicVolume.focus();
+  else if (restoreFocus) musicVolumeToggle.focus();
+}
+musicVolumeToggle.addEventListener("click", () => setMusicVolumeOpen(musicVolumePanel.hidden));
+document.addEventListener("pointerdown", event => {
+  if (!musicVolumePanel.hidden && !musicVolumeControl.contains(event.target)) setMusicVolumeOpen(false);
+});
+musicVolumeControl.addEventListener("keydown", event => {
+  if (event.key !== "Escape" || musicVolumePanel.hidden) return;
+  event.preventDefault();
+  event.stopPropagation();
+  setMusicVolumeOpen(false, true);
+});
+musicVolumeControl.addEventListener("focusout", event => {
+  if (!musicVolumeControl.contains(event.relatedTarget)) setMusicVolumeOpen(false);
+});
+
 

@@ -58,18 +58,26 @@
                   <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 12h13M13 6l6 6-6 6"/></svg>
                 </button>
                 </form>
-                <div class="home-utilities">
+                <div class="home-utilities" role="group" aria-label="Clock and music">
                   <div class="home-clock">
                     <time id="clock-time" aria-label="Current time">--:--:--</time>
                     <button id="clock-timezone" type="button" aria-haspopup="dialog" aria-controls="timezone-dialog" aria-label="Change clock GMT offset">GMT+7 <span aria-hidden="true">⌄</span></button>
                   </div>
-                  <div class="home-music">
+                  <div class="home-music" role="group" aria-label="Music player">
                     <audio id="music-audio" preload="metadata" src="assets/music/冷夜.mp3" hidden></audio>
                     <button class="music-play" id="music-play" type="button" aria-label="Play 冷夜" aria-pressed="false"><span aria-hidden="true">▶</span></button>
                     <div class="music-track"><span class="music-title" lang="zh">冷夜</span><span class="music-position" id="music-position">0:00 / 0:00</span></div>
                     <label class="quick-link-sr-only" for="music-seek">Track position</label>
                     <input class="music-slider music-seek" id="music-seek" type="range" min="0" max="1000" value="0" disabled />
-                    <div class="music-volume"><span aria-hidden="true">♪</span><label class="quick-link-sr-only" for="music-volume">Volume</label><input class="music-slider" id="music-volume" type="range" min="0" max="100" value="70" /></div>
+                    <div class="music-volume-control" id="music-volume-control">
+                      <button class="music-volume-toggle" id="music-volume-toggle" type="button" aria-label="Adjust volume" aria-expanded="false" aria-controls="music-volume-panel" title="Volume">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg>
+                      </button>
+                      <div class="music-volume-panel" id="music-volume-panel" hidden>
+                        <label for="music-volume">Volume</label>
+                        <input class="music-slider" id="music-volume" type="range" min="0" max="100" value="70" />
+                      </div>
+                    </div>
                     <p class="music-status" id="music-status" role="status" hidden></p>
                   </div>
                 </div>
