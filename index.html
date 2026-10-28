@@ -60,8 +60,11 @@
                 </form>
                 <div class="home-utilities" role="group" aria-label="Clock and music">
                   <div class="home-clock">
-                    <time id="clock-time" aria-label="Current time">--:--:--</time>
-                    <button id="clock-timezone" type="button" aria-haspopup="dialog" aria-controls="timezone-dialog" aria-label="Change clock GMT offset">GMT+7 <span aria-hidden="true">⌄</span></button>
+                    <time id="clock-time" aria-label="Current time"><span id="clock-hours-minutes"><span class="clock-digit">-</span><span class="clock-digit">-</span><span class="clock-colon">:</span><span class="clock-digit">-</span><span class="clock-digit">-</span></span><span class="clock-seconds" id="clock-seconds"><span class="clock-colon">:</span><span class="clock-digit">-</span><span class="clock-digit">-</span></span></time>
+                    <button class="timezone-pill" id="clock-timezone" type="button" popovertarget="timezone-dialog" aria-haspopup="dialog" aria-controls="timezone-dialog" aria-expanded="false" aria-label="Change clock GMT offset">
+                      <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="9"/><ellipse cx="12" cy="12" rx="4" ry="9"/><path d="M3 12h18"/></svg>
+                      <span id="clock-timezone-label">GMT+7</span>
+                    </button>
                   </div>
                   <div class="home-music" role="group" aria-label="Music player">
                     <audio id="music-audio" preload="metadata" src="assets/music/冷夜.mp3" hidden></audio>
@@ -71,11 +74,12 @@
                     <input class="music-slider music-seek" id="music-seek" type="range" min="0" max="1000" value="0" disabled />
                     <div class="music-volume-control" id="music-volume-control">
                       <button class="music-volume-toggle" id="music-volume-toggle" type="button" aria-label="Adjust volume" aria-expanded="false" aria-controls="music-volume-panel" title="Volume">
-                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/></svg>
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M11 5 6 9H3v6h3l5 4V5Z"/><path class="music-speaker-waves" d="M15 8a6 6 0 0 1 0 8M18 5a10 10 0 0 1 0 14"/><path class="music-speaker-muted" d="m16 9 5 6m0-6-5 6"/></svg>
                       </button>
                       <div class="music-volume-panel" id="music-volume-panel" hidden>
-                        <label for="music-volume">Volume</label>
+                        <div class="music-volume-heading"><label for="music-volume">Volume</label><output id="music-volume-value" for="music-volume" aria-live="off">70%</output></div>
                         <input class="music-slider" id="music-volume" type="range" min="0" max="100" value="70" />
+                        <button class="music-mute" id="music-mute" type="button" aria-label="Mute 冷夜" aria-pressed="false">Mute</button>
                       </div>
                     </div>
                     <p class="music-status" id="music-status" role="status" hidden></p>
@@ -153,7 +157,7 @@
         </div>
       </form>
     </dialog>
-    <dialog class="quick-link-dialog timezone-dialog" id="timezone-dialog" aria-labelledby="timezone-title">
+    <div class="timezone-popover" id="timezone-dialog" popover="auto" role="dialog" aria-labelledby="timezone-title">
       <form id="timezone-form">
         <h2 id="timezone-title">Set GMT offset</h2>
         <div class="timezone-wheels">
@@ -162,7 +166,7 @@
         </div>
         <div class="quick-link-dialog-actions"><button id="timezone-cancel" type="button">Cancel</button><button class="quick-link-save" type="submit">Done</button></div>
       </form>
-    </dialog>
+    </div>
     <script src="script.js"></script>
   </body>
 </html>

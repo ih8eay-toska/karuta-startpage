@@ -674,7 +674,9 @@ form.addEventListener("submit", (event) => {
 syncEngineMark();
 
 const clockTime = document.querySelector("#clock-time");
+const clockDigits = [...clockTime.querySelectorAll(".clock-digit")];
 const clockTimezone = document.querySelector("#clock-timezone");
+const clockTimezoneLabel = document.querySelector("#clock-timezone-label");
 let clockOffset = 7 * 60;
 try {
   const savedOffset = localStorage.getItem("toska-clock-gmt-offset");
@@ -698,7 +700,7 @@ function formatOffsetHours(minutes) {
 }
 function updateClockOffsetLabel() {
   const label = `GMT${clockOffset < 0 ? "−" : "+"}${formatOffsetHours(clockOffset)}`;
-  clockTimezone.textContent = `${label} ⌄`;
+  clockTimezoneLabel.textContent = label;
   clockTimezone.setAttribute("aria-label", `Change clock GMT offset, currently ${label}`);
 }
 updateClockOffsetLabel();
@@ -760,22 +762,51 @@ function setupHoursWheel() {
   values.sort((a, b) => a - b);
   setupOffsetWheel(timezoneHoursWheel, values.map(value => ({ value, label: formatOffsetHours(value) })), pickerOffsetMinutes, value => { pickerOffsetMinutes = value; });
 }
-clockTimezone.addEventListener("click", () => {
+function positionTimezonePopover() {
+  if (!timezoneDialog.matches(":popover-open")) return;
+  const anchor = clockTimezone.getBoundingClientRect();
+  const panel = timezoneDialog.getBoundingClientRect();
+  const below = anchor.bottom + 8;
+  const top = below + panel.height <= window.innerHeight - 12 ? below : anchor.top - panel.height - 8;
+  timezoneDialog.style.left = `${Math.max(12, Math.min(anchor.left, window.innerWidth - panel.width - 12))}px`;
+  timezoneDialog.style.top = `${Math.max(12, Math.min(top, window.innerHeight - panel.height - 12))}px`;
+}
+function closeTimezonePopover() {
+  timezoneDialog.hidePopover();
+  clockTimezone.focus({ preventScroll: true });
+}
+timezoneDialog.addEventListener("toggle", event => {
+  const open = event.newState === "open";
+  clockTimezone.setAttribute("aria-expanded", String(open));
+  if (!open) return;
   pickerOffsetSign = clockOffset < 0 ? -1 : 1;
   pickerOffsetMinutes = Math.abs(clockOffset);
-  timezoneDialog.showModal();
   setupOffsetWheel(timezoneSignWheel, [{ value: 1, label: "+" }, { value: -1, label: "−" }], pickerOffsetSign, value => {
     pickerOffsetSign = value;
     setupHoursWheel();
   });
   setupHoursWheel();
-  timezoneSignWheel.focus();
+  positionTimezonePopover();
+  timezoneSignWheel.focus({ preventScroll: true });
 });
-document.querySelector("#timezone-cancel").addEventListener("click", () => timezoneDialog.close());
+timezoneDialog.addEventListener("keydown", event => {
+  if (event.key !== "Escape") return;
+  event.preventDefault();
+  event.stopPropagation();
+  closeTimezonePopover();
+});
+window.addEventListener("resize", positionTimezonePopover);
+window.addEventListener("scroll", positionTimezonePopover, { passive: true });
+document.querySelector("#timezone-cancel").addEventListener("click", closeTimezonePopover);
 const clockFormatter = new Intl.DateTimeFormat("en-GB", { timeZone: "UTC", hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23" });
 function updateClock() {
   const now = new Date();
-  clockTime.textContent = clockFormatter.format(new Date(now.getTime() + clockOffset * 60000));
+  const formatted = clockFormatter.format(new Date(now.getTime() + clockOffset * 60000));
+  clockTime.setAttribute("aria-label", `Current time ${formatted}`);
+  const digits = formatted.replaceAll(":", "");
+  clockDigits.forEach((digit, index) => {
+    if (digit.textContent !== digits[index]) digit.textContent = digits[index];
+  });
   clockTime.dateTime = now.toISOString();
 }
 document.querySelector("#timezone-form").addEventListener("submit", event => {
@@ -786,7 +817,7 @@ document.querySelector("#timezone-form").addEventListener("submit", event => {
   try { localStorage.setItem("toska-clock-gmt-offset", String(clockOffset)); } catch { /* Keep the choice for this visit. */ }
   updateClockOffsetLabel();
   updateClock();
-  timezoneDialog.close();
+  closeTimezonePopover();
 });
 updateClock();
 setInterval(() => { if (!document.hidden) updateClock(); }, 1000);
@@ -798,6 +829,12 @@ const musicSeek = document.querySelector("#music-seek");
 const musicVolume = document.querySelector("#music-volume");
 const musicPosition = document.querySelector("#music-position");
 const musicStatus = document.querySelector("#music-status");
+const musicVolumeControl = document.querySelector("#music-volume-control");
+const musicVolumeToggle = document.querySelector("#music-volume-toggle");
+const musicVolumePanel = document.querySelector("#music-volume-panel");
+const musicVolumeValue = document.querySelector("#music-volume-value");
+const musicMute = document.querySelector("#music-mute");
+let lastAudibleVolume = Number(musicVolume.value) / 100 || .7;
 function formatMusicTime(seconds) {
   const value = Number.isFinite(seconds) ? Math.max(0, Math.floor(seconds)) : 0;
   return `${Math.floor(value / 60)}:${String(value % 60).padStart(2, "0")}`;
@@ -840,18 +877,36 @@ musicSeek.addEventListener("input", () => {
   if (Number.isFinite(musicAudio.duration)) musicAudio.currentTime = Number(musicSeek.value) / 1000 * musicAudio.duration;
   updateMusicPosition();
 });
+function syncMusicVolumeUI() {
+  const percent = Math.round(musicAudio.volume * 100);
+  const silent = musicAudio.muted || percent === 0;
+  if (musicAudio.volume > 0) lastAudibleVolume = musicAudio.volume;
+  musicVolume.value = String(percent);
+  musicVolume.style.setProperty("--progress", `${percent}%`);
+  musicVolume.setAttribute("aria-valuetext", musicAudio.muted ? `${percent}%, muted` : `${percent}%`);
+  musicVolumeValue.textContent = musicAudio.muted ? "Muted" : `${percent}%`;
+  musicVolumeToggle.dataset.muted = String(silent);
+  musicMute.textContent = silent ? "Unmute" : "Mute";
+  musicMute.setAttribute("aria-label", silent ? "Unmute 冷夜" : "Mute 冷夜");
+  musicMute.setAttribute("aria-pressed", String(silent));
+}
 function updateMusicVolume() {
   musicAudio.volume = Number(musicVolume.value) / 100;
-  musicVolume.style.setProperty("--progress", `${musicVolume.value}%`);
-  musicVolume.setAttribute("aria-valuetext", `${musicVolume.value}%`);
+  musicAudio.muted = false;
+  syncMusicVolumeUI();
 }
+musicMute.addEventListener("click", () => {
+  if (musicAudio.muted || musicAudio.volume === 0) {
+    musicAudio.muted = false;
+    if (musicAudio.volume === 0) musicAudio.volume = lastAudibleVolume;
+  } else musicAudio.muted = true;
+  syncMusicVolumeUI();
+});
+musicAudio.addEventListener("volumechange", syncMusicVolumeUI);
 musicVolume.addEventListener("input", updateMusicVolume);
 updateMusicVolume();
 updateMusicPosition();
 
-const musicVolumeControl = document.querySelector("#music-volume-control");
-const musicVolumeToggle = document.querySelector("#music-volume-toggle");
-const musicVolumePanel = document.querySelector("#music-volume-panel");
 function setMusicVolumeOpen(open, restoreFocus = false) {
   musicVolumePanel.hidden = !open;
   musicVolumeToggle.setAttribute("aria-expanded", String(open));
